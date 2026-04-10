@@ -1,0 +1,9 @@
+streamlit
+pandas
+numpy
+torch
+requests
+psutil
+fpdf
+matplotlib
+shap
