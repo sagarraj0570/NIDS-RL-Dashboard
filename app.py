@@ -288,14 +288,13 @@ def push_openflow_drop_rule(ip):
 # SESSION STATE
 # ══════════════════════════════════════════════════════════════
 DEFAULTS = {
-    'authenticated': False,
     'logs': [], 'sdn_rules': [],
     'normal_packets': 0, 'attacks_blocked': 0,
     'is_running': False,
     'chart_time': [], 'chart_normal': [], 'chart_threat': [],
     'threat_type_counts': {'SQL Injection':0,'DDoS Flood':0,'Port Scan':0,'Botnet C&C':0},
     'bytes_total': 0,
-    'session_start': None,
+    'session_start': datetime.now(),
     'blocked_ips': set(),
 }
 for k, v in DEFAULTS.items():
@@ -337,46 +336,6 @@ def process_packet_batch(n, model):
             'Data_Index':      int(ix),
         })
     return out
-
-# ══════════════════════════════════════════════════════════════
-# AUTHENTICATION
-# ══════════════════════════════════════════════════════════════
-if not st.session_state['authenticated']:
-    _, mid, _ = st.columns([1.4, 1, 1.4])
-    with mid:
-        st.markdown("<br><br><br>", unsafe_allow_html=True)
-        st.markdown(
-            f'<div style="text-align:center;margin-bottom:2rem;">'
-            f'<div style="font-family:{T["mono"]};font-size:0.56rem;letter-spacing:0.28em;color:{T["acc"]};text-transform:uppercase;margin-bottom:0.6rem;">SCOPE · VIT VELLORE · RESTRICTED</div>'
-            f'<div style="font-size:2.8rem;margin-bottom:0.6rem;filter:drop-shadow(0 0 20px {T["acc"]}44);">🛡️</div>'
-            f'<div style="font-family:{T["disp"]};font-size:1.6rem;font-weight:800;color:{T["t0"]};letter-spacing:-0.025em;margin-bottom:0.35rem;">NIDS-RL Command Center</div>'
-            f'<div style="font-size:0.78rem;color:{T["t2"]};">Authorized access only — all sessions are monitored</div>'
-            f'</div>', unsafe_allow_html=True)
-
-        st.markdown(
-            f'<div style="background:{T["card"]};border:1px solid {T["b1"]};'
-            f'border-radius:12px;padding:2rem;box-shadow:0 0 40px rgba(46,124,240,0.10);">',
-            unsafe_allow_html=True)
-
-        with st.form("login_form"):
-            st.text_input("Administrator ID", key="user", placeholder="admin")
-            st.text_input("Passkey", type="password", key="pwd", placeholder="••••••••")
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.form_submit_button("Authenticate →", use_container_width=True, type="primary"):
-                if st.session_state.user == "admin" and st.session_state.pwd == "admin":
-                    st.session_state['authenticated'] = True
-                    st.session_state['session_start'] = datetime.now()
-                    st.rerun()
-                else:
-                    st.error("Authentication failed. Invalid credentials.")
-
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown(
-            f'<div style="text-align:center;margin-top:1rem;font-family:{T["mono"]};'
-            f'font-size:0.58rem;color:{T["t2"]};letter-spacing:0.12em;">'
-            f'AES-256-GCM · TLS 1.3 · ZERO-KNOWLEDGE SESSION</div>', unsafe_allow_html=True)
-    st.stop()
-
 
 # ══════════════════════════════════════════════════════════════
 # SIDEBAR
@@ -460,12 +419,6 @@ with st.sidebar:
         + kv_row("Session UTC", datetime.utcnow().strftime("%H:%M"), T["t1"])
         + f'</div>', unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("← Log Out", use_container_width=True):
-        for k in list(DEFAULTS.keys()):
-            st.session_state[k] = DEFAULTS[k]
-        st.rerun()
-
 current_model = dqn_model if "Q-Network" in active_engine_name else hybrid_model
 
 
@@ -543,7 +496,7 @@ elif app_mode == "Live Mitigation Engine":
     live_badge = "● LIVE" if is_live else "○ HALTED"
     live_color = T["success"] if is_live else T["danger"]
     st.markdown(page_header("⚡","Real-Time Analysis","Live Threat Mitigation Engine",
-                             live_badge, live_color), unsafe_allow_html=True)
+                               live_badge, live_color), unsafe_allow_html=True)
 
     if processed_data is None:
         st.error("System Failure: Data files (test_raw.csv / test_processed.csv) not found.")
