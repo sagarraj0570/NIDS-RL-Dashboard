@@ -7,3 +7,4 @@ psutil
 fpdf
 matplotlib
 shap
+selenium==4.24.0
