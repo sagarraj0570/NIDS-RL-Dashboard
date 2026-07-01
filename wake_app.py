@@ -2,23 +2,23 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time
 
-# Your Streamlit URL
-URL = "https://nids-capstone-vit.streamlit.app/"
+APP_URL = "https://nids-capstone-vit.streamlit.app/"
 
 options = Options()
-
 options.add_argument("--headless=new")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
-options.add_argument("--disable-gpu")
 
 driver = webdriver.Chrome(options=options)
 
-driver.get(URL)
+try:
+    print("Opening Streamlit App...")
+    driver.get(APP_URL)
 
-# Wait for Streamlit to fully establish websocket
-time.sleep(20)
+    # Wait 30 seconds so Streamlit can fully load
+    time.sleep(30)
 
-driver.quit()
+    print("Visit completed successfully!")
 
-print("Visited successfully.")
+finally:
+    driver.quit()
