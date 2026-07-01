@@ -1,1 +1,27 @@
+name: Keep Streamlit Awake
 
+on:
+  schedule:
+    - cron: "0 */8 * * *"
+
+  workflow_dispatch:
+
+jobs:
+  wake-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Selenium
+        run: |
+          pip install selenium webdriver-manager
+
+      - name: Run Script
+        run: python wake_app.py
